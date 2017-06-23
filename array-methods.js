@@ -74,7 +74,11 @@ var datasetWithRoundedDime = bankBalances.map( function( element ){
   var cents = Math.round( Number( element.amount.slice( element.amount.length - 3 ) ) );
   element.roundedDime = dollars + cents;*/
 
-  return element;
+  return {
+    amount : element.amount,
+    state : element.state,
+    roundedDime : 0
+  };
 } );
 
 
