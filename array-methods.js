@@ -30,8 +30,11 @@ var hundredThousandairs = bankBalances.filter( function( element ){
   assign the resulting new array to `datasetWithRoundedDollar`
 */
 var datasetWithRoundedDollar = bankBalances.map( function( element ){
-  element.rounded = Math.round( element.amount );
-  return element;
+  return {
+    amount : element.amount,
+    state : element.state,
+    rounded : Math.round( element.amount )
+  };
 //make objects out of each account
 //transfer properties amount and state
 //add key of rounded, which is amount rounded.
@@ -59,8 +62,21 @@ var datasetWithRoundedDollar = bankBalances.map( function( element ){
       "roundedDime": 134758.4
     }
   assign the resulting new array to `roundedDime`
+
+make new objects of each account.
+transfer properties state and amount
+add new property roundedDime.  value is rounded to nearest 10th of cent.
 */
-var datasetWithRoundedDime = null;
+
+var datasetWithRoundedDime = bankBalances.map( function( element ){
+
+  /*var dollars = Math.floor(  Number( element.amount ) );
+  var cents = Math.round( Number( element.amount.slice( element.amount.length - 3 ) ) );
+  element.roundedDime = dollars + cents;*/
+
+  return element;
+} );
+
 
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
 var sumOfBankBalances = null;
