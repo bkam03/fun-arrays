@@ -125,7 +125,6 @@ var sumOfInterests =  ( bankBalances.filter( function ( account ){
 .reduce( function( carryingSum, amount ){
   return carryingSum + roundToNearestCent( amount );
 } );
-console.log( sumOfInterests );
 
 /*
   aggregate the sum of bankBalance amounts
@@ -142,8 +141,24 @@ console.log( sumOfInterests );
     if at any point durig your calculation where the number looks like `2486552.9779399997`
     round this number to the nearest 10th of a cent before moving on.
   )
+
+  create hash table by getting the names of all states in accounts
+  and adding amount to key.
  */
-var stateSums = null;
+var stateSums = bankBalances.reduce( function( hashTable, account ){
+  if( !hashTable.hasOwnProperty( account.state ) ){
+    hashTable[ account.state ] = 0;
+  }
+  hashTable[ account.state ] += roundToNearestCent( Number( account.amount ) );
+
+
+  return hashTable;
+}, {} );
+
+/*.reduce( function( hashTable, account ){
+  hashTable[ account.state ] += Number( account.amount );
+  return hashTable;
+}, {} )*/
 
 /*
   from each of the following states:
