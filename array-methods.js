@@ -13,6 +13,10 @@ function filterByState ( state, passingStates ){
   return ( passingStates.indexOf( state ) > -1 ) ? true : false;
 }
 
+function findIndexOfState( state, stateArray ){
+  return
+}
+
 var bankBalances = dataset.bankBalances;
 /*
   create an array with accounts from bankBalances that are
@@ -42,16 +46,18 @@ var hundredThousandairs = bankBalances.filter( function( element ){
     }
   assign the resulting new array to `datasetWithRoundedDollar`
 */
-var datasetWithRoundedDollar = bankBalances.map( function( element ){
+function roundDollar ( element ){
   return {
     amount : element.amount,
     state : element.state,
     rounded : Math.round( element.amount )
-  };
+  }
+}
+
+var datasetWithRoundedDollar = bankBalances.map( roundDollar );
 //make objects out of each account
 //transfer properties amount and state
 //add key of rounded, which is amount rounded.
-} );
 
 /*
   DO NOT MUTATE DATA.
@@ -81,15 +87,16 @@ transfer properties state and amount
 add new property roundedDime.  value is rounded to nearest 10th of cent.
 */
 
-var datasetWithRoundedDime = bankBalances.map( function( element ){
-
+function roundToDime( element ){
   return {
     amount : element.amount,
     state : element.state,
-    roundedDime : Math.floor( Number( element.amount ) ) + ( Math.round( Number( element.amount.slice( element.amount.length - 2 ) ) * 0.1 ) * 0.1 )
-
+    roundedDime :
+    Math.floor( Number( element.amount ) ) + ( Math.round( Number( element.amount.slice( element.amount.length - 2 ) ) * 0.1 ) * 0.1 )
   };
-} );
+};
+
+var datasetWithRoundedDime = bankBalances.map( roundToDime );
 
 
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
@@ -127,7 +134,7 @@ var sumOfInterests =  ( bankBalances.filter( function ( account ){
   return carryingSum + roundToNearestCent( amount );
 } );
 
-console.log('sumOfInterests', sumOfInterests );
+//console.log('sumOfInterests', sumOfInterests );
 
 /*
   aggregate the sum of bankBalance amounts
@@ -148,14 +155,11 @@ console.log('sumOfInterests', sumOfInterests );
   create hash table by getting the names of all states in accounts
   and adding amount to key.
  */
-var stateSums = bankBalances.reduce( function( hashTable, account ){
-  if( !hashTable.hasOwnProperty( account.state ) ){
-    hashTable[ account.state ] = 0;
-  }
-  hashTable[ account.state ] += roundToNearestCent( Number( account.amount ) );
+function generateStateTotals ( hashTable, account ){
+  hashTable[ account.state ] = Number( account.amount ) + Number(( !hashTable.hasOwnProperty( account.state ) ) ? 0 : hashTable[ account.state ] );
   return hashTable;
-}, {} );
-
+}
+var stateSums = bankBalances.reduce( generateStateTotals, {} );
 
 /*
   from each of the following states:
@@ -177,40 +181,60 @@ in these accounts, add 18.9% interest.
 add the interest in each state
 if > 50k add to sum of high interests
  */
-var sumOfHighInterests = bankBalances.filter( function( account ){
+var sumOfHighInterests = sumOfInterests + bankBalances.filter( function( account ){
   return filterByState( account.state, passingStates );
 } )
 .reduce( function ( stateSumArray, account ){
-  stateSumArray[ passingStates.indexOf( account.state ) ] = ( passingStates.indexOf( account.state ) > -1 ) ?  ( account.amount * 1.189 ) :  stateSumArray[ passingStates.indexOf( account.state ) ] + ( account.amount * 1.189 );
+  stateSumArray[ passingStates.indexOf( account.state ) ] = ( passingStates.indexOf( account.state ) > -1 ) ?  ( Number( account.amount ) * 1.189 ) :  stateSumArray[ passingStates.indexOf( account.state ) ] + ( Number( account.amount ) * 1.189 );
   return stateSumArray;
 }, [] )
 .reduce( function( carryingSum, stateSum ){
-  console.log( carryingSum );
+  //console.log( carryingSum );
   return carryingSum + stateSum;
   //return ( stateSum > 50000 ) ? stateSum : 0;
 }, 0 );
-console.log( sumOfHighInterests );
+//console.log( sumOfHighInterests );
 
-
-/*bankBalances.filter( function( account ){
-  return filterByState( account.state, passingStates );
-} )
-
-//MAKE AN ARRAY THAT SUMS INTEREST AMOUNT IN EVERY STATE, AND THOSE THAT EXCEED 50K MAKE IT TO THE FINAL VARIABLE
-
-.reduce( function( carryingSum, account ){
-  return carryingSum + ( ( ( Number( account.amount ) * .189 ) > 50000) ? ( Number( account.amount ) *.189 ) : 0 );
-}, 0 );
-
-
-console.log( 'sumOfInterests', sumOfInterests);*/
 /*
   set `lowerSumStates` to be an array of two letter state
   abbreviations of each state where the sum of amounts
   in the state is less than 1,000,000
- */
-var lowerSumStates = null;
 
+bankBalances( accounts w/ keys state, amount)
+  use reduce to get all states that have accounts, accumulate state totals
+object of states w/ keys state, amount
+  convert using a function that makes objects into below
+array of objects{ states w/ keys state, amount }
+  filter states with 1mill+ out
+array of objects( states with less than 1Mill.)
+array of state abbrev with sums of less than 1Mill.
+
+ */
+function objectToArrayOfObjects( object ){
+  //take each property. make key a property, amount a property.
+  var convertedArray = [];
+  for( var key in object ){
+    convertedArray.push({
+      'state' : key,
+      'amount' : object[ key ]
+    });
+  }
+  return convertedArray;
+}
+
+function isNotMillionaires( account ){
+  return ( Number( account.amount ) < 1000000 ) ? true : false;
+}
+
+function extractStateAbbrevFromObject ( account ){
+  return account.state;
+}
+
+var lowerSumStates = objectToArrayOfObjects( bankBalances.reduce( generateStateTotals, {} ) )
+  .filter( isNotMillionaires )
+  .map( extractStateAbbrevFromObject );
+
+console.log( 'lowerSumStates',lowerSumStates );
 /*
   aggregate the sum of each state into one hash table
   `higherStateSums` should be the sum of all states with totals greater than 1,000,000
