@@ -285,7 +285,7 @@ function isOverTwoHalfMillion ( account ){
 var areStatesInHigherStateSum = objectToArrayOfObjects( bankBalances.reduce( generateStateTotals, {} ) )
   .every( isOverTwoHalfMillion );
 
-console.log( 'higherStateSums', higherStateSums );;
+//console.log( 'higherStateSums', higherStateSums );;
 
 /*
   Stretch Goal && Final Boss
@@ -300,8 +300,28 @@ console.log( 'higherStateSums', higherStateSums );;
     Delaware
   have a sum of account values greater than 2,550,000
   otherwise set it to be `false`
+
+  bankBalances( array of Objects with state and amount prop)
+    filter out 6 states
+  array of qualified states
+
+    use generate state totals function
+  object hashTable of state totals
+    use object to array function
+  array of states objects, each state contains the total account value
+    use some, if any state passes isOverTwoHalfMillion func
+  true or false
  */
-var anyStatesInHigherStateSum = null;
+function stateSumsObjectToSumsArray( stateAmount ){
+
+}
+var anyStatesInHigherStateSum = objectToArrayOfObjects( ( bankBalances.filter( function ( account ){
+  return filterByState( account.state, passingStates ) ;
+} ) ).reduce( generateStateTotals, {} ) )
+  .some( isOverTwoHalfMillion );
+
+console.log( 'anyStatesInHigherStateSum', anyStatesInHigherStateSum );
+
 
 
 module.exports = {
