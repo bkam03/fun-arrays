@@ -234,12 +234,28 @@ var lowerSumStates = objectToArrayOfObjects( bankBalances.reduce( generateStateT
   .filter( isNotMillionaires )
   .map( extractStateAbbrevFromObject );
 
-console.log( 'lowerSumStates',lowerSumStates );
 /*
   aggregate the sum of each state into one hash table
   `higherStateSums` should be the sum of all states with totals greater than 1,000,000
  */
-var higherStateSums = null;
+function isMillionaire( account ){
+  return ( Number( account.amount ) > 1000000 ) ? true : false;
+}
+
+function stateObjectToAmountOnly ( account ){
+  return Number( account.amount );
+}
+
+function addUpAmounts( sum, amount ){
+  return sum + amount;
+}
+
+var higherStateSums = objectToArrayOfObjects( bankBalances.reduce( generateStateTotals, {} ) )
+  .filter( isMillionaire )
+  .map( stateObjectToAmountOnly )
+  .reduce( addUpAmounts );
+
+console.log( 'higherStateSums', higherStateSums );
 
 /*
   from each of the following states:
@@ -255,8 +271,18 @@ var higherStateSums = null;
 
   if true set `areStatesInHigherStateSum` to `true`
   otherwise set it to `false`
+
+  bankBalances( array of Objects with state and amount prop)
+    use generate state totals function
+  object hashTable of state totals
+    use object to array function
+  array of states objects, each state contains the total account value
+    use every to check if all state amounts > 2,550,000
+  true or false
  */
-var areStatesInHigherStateSum = null;
+var areStatesInHigherStateSum = objectToArrayOfObjects( bankBalances.reduce( generateStateTotals, {} ) );
+
+//console.log( 'higherStateSums', higherStateSums );;
 
 /*
   Stretch Goal && Final Boss
