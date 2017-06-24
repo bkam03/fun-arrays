@@ -1,5 +1,12 @@
 var dataset = require('./dataset.json');
 
+
+function roundToNearestCent( num ){
+  return Math.ceil(num * 100) / 100;
+}
+
+
+
 var bankBalances = dataset.bankBalances;
 /*
   create an array with accounts from bankBalances that are
@@ -70,20 +77,19 @@ add new property roundedDime.  value is rounded to nearest 10th of cent.
 
 var datasetWithRoundedDime = bankBalances.map( function( element ){
 
-  console.log( element.amount.slice( element.amount.length - 2 ) );
   return {
     amount : element.amount,
     state : element.state,
     roundedDime : Math.floor( Number( element.amount ) ) + ( Math.round( Number( element.amount.slice( element.amount.length - 2 ) ) * 0.1 ) * 0.1 )
 
-    //134758.46 > 124658.5
-    //124758 + 5
   };
 } );
 
 
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
-var sumOfBankBalances = null;
+var sumOfBankBalances = bankBalances.reduce( function ( carryingSum, account ){
+  return carryingSum + Number( account.amount );
+}, 0 );
 
 /*
   from each of the following states:
@@ -96,7 +102,30 @@ var sumOfBankBalances = null;
   take each `amount` and add 18.9% interest to it rounded to the nearest cent
   and then sum it all up into one value saved to `sumOfInterests`
  */
-var sumOfInterests = null;
+
+
+//filter out accounts from above states
+//add 18.9% interest, rounded to nearest cent to these accounts
+//sum everything into one value, sum of all affected accounts
+function filterByState ( state, passingStates ){
+  if( passingStates.indexOf( state ) > -1 ){
+    return true;
+  }
+  return false;
+}
+
+var passingStates = [ 'WI', 'IL', 'WY', 'OH', 'GA', 'DE' ];
+
+var sumOfInterests =  ( bankBalances.filter( function ( account ){
+  return filterByState( account.state, passingStates ) ;
+} ) )
+.map( function( account ){
+  return account.amount * .189;
+} )
+.reduce( function( carryingSum, amount ){
+  return carryingSum + roundToNearestCent( amount );
+} );
+console.log( sumOfInterests );
 
 /*
   aggregate the sum of bankBalance amounts
