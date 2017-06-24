@@ -255,8 +255,6 @@ var higherStateSums = objectToArrayOfObjects( bankBalances.reduce( generateState
   .map( stateObjectToAmountOnly )
   .reduce( addUpAmounts );
 
-console.log( 'higherStateSums', higherStateSums );
-
 /*
   from each of the following states:
     Wisconsin
@@ -280,9 +278,14 @@ console.log( 'higherStateSums', higherStateSums );
     use every to check if all state amounts > 2,550,000
   true or false
  */
-var areStatesInHigherStateSum = objectToArrayOfObjects( bankBalances.reduce( generateStateTotals, {} ) );
+function isOverTwoHalfMillion ( account ){
+  return ( Number( account.amount ) > 2550000 ) ? true : false;
+}
 
-//console.log( 'higherStateSums', higherStateSums );;
+var areStatesInHigherStateSum = objectToArrayOfObjects( bankBalances.reduce( generateStateTotals, {} ) )
+  .every( isOverTwoHalfMillion );
+
+console.log( 'higherStateSums', higherStateSums );;
 
 /*
   Stretch Goal && Final Boss
