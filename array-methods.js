@@ -2,10 +2,16 @@ var dataset = require('./dataset.json');
 
 
 function roundToNearestCent( num ){
-  return Math.ceil(num * 100) / 100;
+  return Math.round(num * 100) / 100;
 }
 
+function roundToNearestTenthOfCent( num ){
+  return Math.round( num * 1000 ) / 1000;
+}
 
+function filterByState ( state, passingStates ){
+  return ( passingStates.indexOf( state ) > -1 ) ? true : false;
+}
 
 var bankBalances = dataset.bankBalances;
 /*
@@ -107,12 +113,7 @@ var sumOfBankBalances = bankBalances.reduce( function ( carryingSum, account ){
 //filter out accounts from above states
 //add 18.9% interest, rounded to nearest cent to these accounts
 //sum everything into one value, sum of all affected accounts
-function filterByState ( state, passingStates ){
-  if( passingStates.indexOf( state ) > -1 ){
-    return true;
-  }
-  return false;
-}
+
 
 var passingStates = [ 'WI', 'IL', 'WY', 'OH', 'GA', 'DE' ];
 
@@ -125,6 +126,8 @@ var sumOfInterests =  ( bankBalances.filter( function ( account ){
 .reduce( function( carryingSum, amount ){
   return carryingSum + roundToNearestCent( amount );
 } );
+
+console.log('sumOfInterests', sumOfInterests );
 
 /*
   aggregate the sum of bankBalance amounts
@@ -150,15 +153,9 @@ var stateSums = bankBalances.reduce( function( hashTable, account ){
     hashTable[ account.state ] = 0;
   }
   hashTable[ account.state ] += roundToNearestCent( Number( account.amount ) );
-
-
   return hashTable;
 }, {} );
 
-/*.reduce( function( hashTable, account ){
-  hashTable[ account.state ] += Number( account.amount );
-  return hashTable;
-}, {} )*/
 
 /*
   from each of the following states:
@@ -175,9 +172,38 @@ var stateSums = bankBalances.reduce( function( hashTable, account ){
     if at any point durig your calculation where the number looks like `2486552.9779399997`
     round this number to the nearest 10th of a cent before moving on.
   )
+filter for accounts from the 6 states
+in these accounts, add 18.9% interest.
+add the interest in each state
+if > 50k add to sum of high interests
  */
-var sumOfHighInterests = null;
+var sumOfHighInterests = bankBalances.filter( function( account ){
+  return filterByState( account.state, passingStates );
+} )
+.reduce( function ( stateSumArray, account ){
+  stateSumArray[ passingStates.indexOf( account.state ) ] = ( passingStates.indexOf( account.state ) > -1 ) ?  ( account.amount * 1.189 ) :  stateSumArray[ passingStates.indexOf( account.state ) ] + ( account.amount * 1.189 );
+  return stateSumArray;
+}, [] )
+.reduce( function( carryingSum, stateSum ){
+  console.log( carryingSum );
+  return carryingSum + stateSum;
+  //return ( stateSum > 50000 ) ? stateSum : 0;
+}, 0 );
+console.log( sumOfHighInterests );
 
+
+/*bankBalances.filter( function( account ){
+  return filterByState( account.state, passingStates );
+} )
+
+//MAKE AN ARRAY THAT SUMS INTEREST AMOUNT IN EVERY STATE, AND THOSE THAT EXCEED 50K MAKE IT TO THE FINAL VARIABLE
+
+.reduce( function( carryingSum, account ){
+  return carryingSum + ( ( ( Number( account.amount ) * .189 ) > 50000) ? ( Number( account.amount ) *.189 ) : 0 );
+}, 0 );
+
+
+console.log( 'sumOfInterests', sumOfInterests);*/
 /*
   set `lowerSumStates` to be an array of two letter state
   abbreviations of each state where the sum of amounts
