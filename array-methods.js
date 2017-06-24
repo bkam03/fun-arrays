@@ -100,9 +100,9 @@ var datasetWithRoundedDime = bankBalances.map( roundToDime );
 
 
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
-var sumOfBankBalances = bankBalances.reduce( function ( carryingSum, account ){
+var sumOfBankBalances = roundToNearestTenthOfCent( bankBalances.reduce( function ( carryingSum, account ){
   return carryingSum + Number( account.amount );
-}, 0 );
+}, 0 ) );
 
 /*
   from each of the following states:
@@ -124,14 +124,14 @@ var sumOfBankBalances = bankBalances.reduce( function ( carryingSum, account ){
 
 var passingStates = [ 'WI', 'IL', 'WY', 'OH', 'GA', 'DE' ];
 
-var sumOfInterests =  ( bankBalances.filter( function ( account ){
+var sumOfInterests = bankBalances.filter( function ( account ){
   return filterByState( account.state, passingStates ) ;
-} ) )
+} )
 .map( function( account ){
-  return account.amount * .189;
+  return  account.amount * .189;
 } )
 .reduce( function( carryingSum, amount ){
-  return carryingSum + roundToNearestCent( amount );
+  return roundToNearestCent( carryingSum + amount );
 } );
 
 //console.log('sumOfInterests', sumOfInterests );
@@ -156,7 +156,7 @@ var sumOfInterests =  ( bankBalances.filter( function ( account ){
   and adding amount to key.
  */
 function generateStateTotals ( hashTable, account ){
-  hashTable[ account.state ] = Number( account.amount ) + Number(( !hashTable.hasOwnProperty( account.state ) ) ? 0 : hashTable[ account.state ] );
+  hashTable[ account.state ] = roundToNearestTenthOfCent( Number( account.amount )  + Number(( !hashTable.hasOwnProperty( account.state ) ) ? 0 : hashTable[ account.state ] ) );
   return hashTable;
 }
 var stateSums = bankBalances.reduce( generateStateTotals, {} );
